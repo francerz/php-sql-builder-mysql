@@ -69,7 +69,7 @@ class MySQLDriver implements DriverInterface
         $object = $query->getObject();
 
         if ($object instanceof SelectQuery) {
-            return new SelectResult($query, $stmt->fetchAll());
+            return new SelectResult($query, $stmt->fetchAll(PDO::FETCH_CLASS));
         } elseif ($object instanceof InsertQuery) {
             return new InsertResult($query, $stmt->rowCount(), $this->link->lastInsertId());
         } elseif ($object instanceof UpdateQuery) {
