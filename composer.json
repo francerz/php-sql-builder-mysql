@@ -1,0 +1,22 @@
+{
+    "name": "francerz/mysql-builder",
+    "description": "MySQL driver for francerz/sql-builder",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Francerz",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Francerz\\SqlBuilder\\MySQL\\": "src"
+        }
+    },
+    "require": {
+        "francerz/sql-builder": "^0.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.4"
+    }
+}
