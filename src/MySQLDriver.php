@@ -11,11 +11,11 @@ use Francerz\SqlBuilder\Driver\QueryTranslatorInterface;
 use Francerz\SqlBuilder\InsertQuery;
 use Francerz\SqlBuilder\Results\DeleteResult;
 use Francerz\SqlBuilder\Results\InsertResult;
-use Francerz\SqlBuilder\Results\QueryResultInterface;
 use Francerz\SqlBuilder\Results\SelectResult;
 use Francerz\SqlBuilder\Results\UpdateResult;
 use Francerz\SqlBuilder\SelectQuery;
 use Francerz\SqlBuilder\UpdateQuery;
+use InvalidArgumentException;
 use LogicException;
 use PDO;
 
@@ -55,27 +55,68 @@ class MySQLDriver implements DriverInterface
     {
         return $this->translator;
     }
-    
-    public function execute(CompiledQuery $query): QueryResultInterface
+
+    public function executeSelect(CompiledQuery $query) : SelectResult
     {
-        if (!isset($this->link)) {
-            throw new LogicException('Database not connected.');
+        if (!$this->link instanceof PDO) {
+            throw new LogicException('Not valid database link.');
         }
-        if (!$this->link instanceof PDO) throw new LogicException('Not valid DB Link.');
+
+        if (!$query->getObject() instanceof SelectQuery) {
+            throw new InvalidArgumentException('Not valid SelectQuery.');
+        }
 
         $stmt = $this->link->prepare($query->getQuery());
         $stmt->execute($query->getValues());
 
-        $object = $query->getObject();
+        return new SelectResult($query, $stmt->fetchAll(PDO::FETCH_CLASS));
+    }
 
-        if ($object instanceof SelectQuery) {
-            return new SelectResult($query, $stmt->fetchAll(PDO::FETCH_CLASS));
-        } elseif ($object instanceof InsertQuery) {
-            return new InsertResult($query, $stmt->rowCount(), $this->link->lastInsertId());
-        } elseif ($object instanceof UpdateQuery) {
-            return new UpdateResult($query, $stmt->rowCount());
-        } elseif ($object instanceof DeleteQuery) {
-            return new DeleteResult($query, $stmt->rowCount());
+    public function executeInsert(CompiledQuery $query) : InsertResult
+    {
+        if (!$this->link instanceof PDO) {
+            throw new LogicException('Not valid database link.');
         }
+
+        if (!$query->getObject() instanceof InsertQuery) {
+            throw new InvalidArgumentException('Not valid InsertQuery.');
+        }
+
+        $stmt = $this->link->prepare($query->getQuery());
+        $stmt->execute($query->getValues());
+
+        return new InsertResult($query, $stmt->rowCount(), $this->link->lastInsertId());
+    }
+
+    public function executeUpdate(CompiledQuery $query) : UpdateResult
+    {
+        if (!$this->link instanceof PDO) {
+            throw new LogicException('Not valid database link.');
+        }
+
+        if (!$query->getObject() instanceof UpdateQuery) {
+            throw new InvalidArgumentException('Not valid UpdateQuery.');
+        }
+
+        $stmt = $this->link->prepare($query->getQuery());
+        $stmt->execute($query->getValues());
+
+        return new UpdateResult($query, $stmt->rowCount());
+    }
+
+    public function executeDelete(CompiledQuery $query) : DeleteResult
+    {
+        if (!$this->link instanceof PDO) {
+            throw new LogicException('Not valid database link.');
+        }
+
+        if (!$query->getObject() instanceof DeleteQuery) {
+            throw new InvalidArgumentException('Not valid DeleteQuery.');
+        }
+
+        $stmt = $this->link->prepare($query->getQuery());
+        $stmt->execute($query->getValues());
+
+        return new DeleteResult($query, $stmt->rowCount());
     }
 }

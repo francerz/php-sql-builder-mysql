@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "francerz/sql-builder",
-            "version": "v0.2.4",
+            "version": "v0.2.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/francerz/php-sql-builder.git",
-                "reference": "dd5410caf34031801bc91bb1e20e67541e7847e1"
+                "reference": "7f6cd33cc53f10d83f78d3e08b431e51cfad9a3c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/francerz/php-sql-builder/zipball/dd5410caf34031801bc91bb1e20e67541e7847e1",
-                "reference": "dd5410caf34031801bc91bb1e20e67541e7847e1",
+                "url": "https://api.github.com/repos/francerz/php-sql-builder/zipball/7f6cd33cc53f10d83f78d3e08b431e51cfad9a3c",
+                "reference": "7f6cd33cc53f10d83f78d3e08b431e51cfad9a3c",
                 "shasum": ""
             },
             "require-dev": {
@@ -40,7 +40,7 @@
                 }
             ],
             "description": "SQL Builder",
-            "time": "2020-11-20T19:47:24+00:00"
+            "time": "2020-11-20T23:31:43+00:00"
         }
     ],
     "packages-dev": [
