@@ -8,6 +8,10 @@ use Francerz\SqlBuilder\DeleteQuery;
 use Francerz\SqlBuilder\Driver\DriverInterface;
 use Francerz\SqlBuilder\Driver\QueryCompilerInterface;
 use Francerz\SqlBuilder\Driver\QueryTranslatorInterface;
+use Francerz\SqlBuilder\Exceptions\ExecuteDeleteException;
+use Francerz\SqlBuilder\Exceptions\ExecuteInsertException;
+use Francerz\SqlBuilder\Exceptions\ExecuteSelectException;
+use Francerz\SqlBuilder\Exceptions\ExecuteUpdateException;
 use Francerz\SqlBuilder\InsertQuery;
 use Francerz\SqlBuilder\Results\DeleteResult;
 use Francerz\SqlBuilder\Results\InsertResult;
@@ -69,6 +73,10 @@ class MySQLDriver implements DriverInterface
         $stmt = $this->link->prepare($query->getQuery());
         $stmt->execute($query->getValues());
 
+        if ($stmt->errorCode() !== '00000') {
+            throw new ExecuteSelectException($query, $stmt->errorInfo()[2]);
+        }
+
         return new SelectResult($query, $stmt->fetchAll(PDO::FETCH_CLASS));
     }
 
@@ -84,6 +92,10 @@ class MySQLDriver implements DriverInterface
 
         $stmt = $this->link->prepare($query->getQuery());
         $stmt->execute($query->getValues());
+
+        if ($stmt->errorCode() !== '00000') {
+            throw new ExecuteInsertException($query, $stmt->errorInfo()[2]);
+        }
 
         return new InsertResult($query, $stmt->rowCount(), $this->link->lastInsertId());
     }
@@ -101,6 +113,10 @@ class MySQLDriver implements DriverInterface
         $stmt = $this->link->prepare($query->getQuery());
         $stmt->execute($query->getValues());
 
+        if ($stmt->errorCode() !== '00000') {
+            throw new ExecuteUpdateException($query, $stmt->errorInfo()[2]);
+        }
+
         return new UpdateResult($query, $stmt->rowCount());
     }
 
@@ -116,6 +132,10 @@ class MySQLDriver implements DriverInterface
 
         $stmt = $this->link->prepare($query->getQuery());
         $stmt->execute($query->getValues());
+
+        if ($stmt->errorCode() !== '00000') {
+            throw new ExecuteDeleteException($query, $stmt->errorInfo()[2]);
+        }
 
         return new DeleteResult($query, $stmt->rowCount());
     }
