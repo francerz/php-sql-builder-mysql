@@ -9,12 +9,15 @@
         }
     ],
     "autoload": {
+        "files": ["src/init.php"],
         "psr-4": {
             "Francerz\\SqlBuilder\\MySQL\\": "src"
         }
     },
     "require": {
-        "francerz/sql-builder": "^0.2"
+        "francerz/sql-builder": "^0.2",
+        "ext-PDO": "^7.0",
+        "php": "^7.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.4"

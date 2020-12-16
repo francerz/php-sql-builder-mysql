@@ -60,6 +60,26 @@ class MySQLDriver implements DriverInterface
         return $this->translator;
     }
 
+    public function getDefaultHost(): string
+    {
+        return 'localhost';
+    }
+
+    public function getDefaultPort(): int
+    {
+        return 3306;
+    }
+
+    public function getDefaultUser(): string
+    {
+        return 'root';
+    }
+
+    public function getDefaultPswd(): string
+    {
+        return '';
+    }
+
     public function executeSelect(CompiledQuery $query) : SelectResult
     {
         if (!$this->link instanceof PDO) {
