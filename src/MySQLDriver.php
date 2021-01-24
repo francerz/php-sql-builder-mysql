@@ -8,6 +8,7 @@ use Francerz\SqlBuilder\DeleteQuery;
 use Francerz\SqlBuilder\Driver\DriverInterface;
 use Francerz\SqlBuilder\Driver\QueryCompilerInterface;
 use Francerz\SqlBuilder\Driver\QueryTranslatorInterface;
+use Francerz\SqlBuilder\Exceptions\DuplicateEntryException;
 use Francerz\SqlBuilder\Exceptions\ExecuteDeleteException;
 use Francerz\SqlBuilder\Exceptions\ExecuteInsertException;
 use Francerz\SqlBuilder\Exceptions\ExecuteSelectException;
@@ -114,6 +115,9 @@ class MySQLDriver implements DriverInterface
         $stmt->execute($query->getValues());
 
         if ($stmt->errorCode() !== '00000') {
+            switch ($stmt->errorCode()) {
+                case '23000': throw new DuplicateEntryException($query, $stmt->errorInfo()[2]);
+            }
             throw new ExecuteInsertException($query, $stmt->errorInfo()[2]);
         }
 
