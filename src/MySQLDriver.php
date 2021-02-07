@@ -115,10 +115,15 @@ class MySQLDriver implements DriverInterface
         $stmt->execute($query->getValues());
 
         if ($stmt->errorCode() !== '00000') {
+            $info = $stmt->errorInfo()[2];
             switch ($stmt->errorCode()) {
-                case '23000': throw new DuplicateEntryException($query, $stmt->errorInfo()[2]);
+                case '23000':
+                    if (stripos($info, 'Duplicate entry') !== false) {
+                        throw new DuplicateEntryException($query, $info);
+                    }
+                    break;
             }
-            throw new ExecuteInsertException($query, $stmt->errorInfo()[2]);
+            throw new ExecuteInsertException($query, $info);
         }
 
         return new InsertResult($query, $stmt->rowCount(), $this->link->lastInsertId());
