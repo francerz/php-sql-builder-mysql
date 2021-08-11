@@ -13,6 +13,7 @@ use Francerz\SqlBuilder\Exceptions\ExecuteDeleteException;
 use Francerz\SqlBuilder\Exceptions\ExecuteInsertException;
 use Francerz\SqlBuilder\Exceptions\ExecuteSelectException;
 use Francerz\SqlBuilder\Exceptions\ExecuteUpdateException;
+use Francerz\SqlBuilder\Exceptions\TransactionException;
 use Francerz\SqlBuilder\InsertQuery;
 use Francerz\SqlBuilder\Results\DeleteResult;
 use Francerz\SqlBuilder\Results\InsertResult;
@@ -23,11 +24,18 @@ use Francerz\SqlBuilder\UpdateQuery;
 use InvalidArgumentException;
 use LogicException;
 use PDO;
+use PDOException;
 
 class MySQLDriver implements DriverInterface
 {
+    /**
+     * Database link connection
+     *
+     * @var PDO
+     */
     private $link;
-    private $compiler, $translator;
+    private $compiler;
+    private $translator;
 
     public function __construct()
     {
@@ -167,5 +175,32 @@ class MySQLDriver implements DriverInterface
         }
 
         return new DeleteResult($query, $stmt->rowCount());
+    }
+
+    public function startTransaction() : bool
+    {
+        try {
+            return $this->link->beginTransaction();
+        } catch (PDOException $pdoex) {
+            throw new TransactionException($pdoex->getMessage(), 1, $pdoex);
+        }
+    }
+
+    public function rollback() : bool
+    {
+        try {
+            return $this->link->rollBack();
+        } catch (PDOException $pdoex) {
+            throw new TransactionException($pdoex->getMessage(), 2, $pdoex);
+        }
+    }
+
+    public function commit() : bool
+    {
+        try {
+            return $this->link->commit();
+        } catch (PDOException $pdoex) {
+            throw new TransactionException($pdoex->getMessage(), 3, $pdoex);
+        }
     }
 }
