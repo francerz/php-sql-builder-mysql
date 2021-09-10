@@ -2,6 +2,7 @@
 
 namespace Francerz\SqlBuilder\MySQL;
 
+use Francerz\SqlBuilder\Components\JoinTypes;
 use Francerz\SqlBuilder\Driver\QueryCompiler;
 
 class MySQLCompiler extends QueryCompiler
@@ -29,5 +30,14 @@ class MySQLCompiler extends QueryCompiler
     protected function compileColumnTable(string $table)
     {
         return "`$table`";
+    }
+    protected function compileJoinType($joinType): string
+    {
+        switch ($joinType) {
+            case JoinTypes::CROSS_JOIN:
+                return ' CROSS JOIN ';
+            default:
+                return parent::compileJoinType($joinType);
+        }
     }
 }
