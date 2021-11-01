@@ -18,7 +18,7 @@
         "php": "^7.0",
         "ext-PDO": "^7.0",
         "ext-pdo_mysql": "^7.0",
-        "francerz/sql-builder": "^0.3"
+        "francerz/sql-builder": "^0.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^8.5"
