@@ -47,15 +47,15 @@ class MySQLDriver implements DriverInterface
     {
         $paramsArr = array(
             "host={$params->getHost()}",
-            'charset=utf8'
+            'charset=' . ($params->getEncoding() ?? 'utf8')
         );
-        $paramsArr[] = 'port='.($params->getPort() ?? 3306);
+        $paramsArr[] = 'port=' . ($params->getPort() ?? 3306);
         $database = $params->getDatabase();
         if (isset($database)) {
             $paramsArr[] = "dbname={$database}";
         }
 
-        $dsn = 'mysql:'.join(';', $paramsArr);
+        $dsn = 'mysql:' . join(';', $paramsArr);
         $this->link = new PDO($dsn, $params->getUser(), $params->getPassword());
     }
 
@@ -89,7 +89,7 @@ class MySQLDriver implements DriverInterface
         return '';
     }
 
-    public function executeSelect(CompiledQuery $query) : SelectResult
+    public function executeSelect(CompiledQuery $query): SelectResult
     {
         if (!$this->link instanceof PDO) {
             throw new LogicException('Not valid database link.');
@@ -109,7 +109,7 @@ class MySQLDriver implements DriverInterface
         return new SelectResult($query, $stmt->fetchAll(PDO::FETCH_CLASS));
     }
 
-    public function executeInsert(CompiledQuery $query) : InsertResult
+    public function executeInsert(CompiledQuery $query): InsertResult
     {
         if (!$this->link instanceof PDO) {
             throw new LogicException('Not valid database link.');
@@ -137,7 +137,7 @@ class MySQLDriver implements DriverInterface
         return new InsertResult($query, $stmt->rowCount(), $this->link->lastInsertId());
     }
 
-    public function executeUpdate(CompiledQuery $query) : UpdateResult
+    public function executeUpdate(CompiledQuery $query): UpdateResult
     {
         if (!$this->link instanceof PDO) {
             throw new LogicException('Not valid database link.');
@@ -157,7 +157,7 @@ class MySQLDriver implements DriverInterface
         return new UpdateResult($query, $stmt->rowCount());
     }
 
-    public function executeDelete(CompiledQuery $query) : DeleteResult
+    public function executeDelete(CompiledQuery $query): DeleteResult
     {
         if (!$this->link instanceof PDO) {
             throw new LogicException('Not valid database link.');
@@ -177,7 +177,7 @@ class MySQLDriver implements DriverInterface
         return new DeleteResult($query, $stmt->rowCount());
     }
 
-    public function startTransaction() : bool
+    public function startTransaction(): bool
     {
         try {
             return $this->link->beginTransaction();
@@ -186,7 +186,7 @@ class MySQLDriver implements DriverInterface
         }
     }
 
-    public function rollback() : bool
+    public function rollback(): bool
     {
         try {
             return $this->link->rollBack();
@@ -195,7 +195,7 @@ class MySQLDriver implements DriverInterface
         }
     }
 
-    public function commit() : bool
+    public function commit(): bool
     {
         try {
             return $this->link->commit();

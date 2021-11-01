@@ -1,5 +1,7 @@
 <?php
 
+namespace Francerz\SqlBuilder\MySQL\Tests;
+
 use Francerz\SqlBuilder\Components\Table;
 use Francerz\SqlBuilder\MySQL\MySQLDriver;
 use Francerz\SqlBuilder\Query;
@@ -18,8 +20,8 @@ class MySQLCompilerTest extends TestCase
 
     public function testCompileSingleQuery()
     {
-        $query = Query::selectFrom(new Table('table', 't1', 'db'), ['a'=>'firstCol', 'b'=>'secondCol']);
-        
+        $query = Query::selectFrom(new Table('table', 't1', 'db'), ['a' => 'firstCol', 'b' => 'secondCol']);
+
         $compiled = $this->compiler->compileQuery($query);
 
         $this->assertEquals(
