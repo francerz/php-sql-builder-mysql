@@ -2,26 +2,21 @@
 
 namespace Francerz\SqlBuilder\MySQL;
 
-use Francerz\SqlBuilder\CompiledQuery;
+use Francerz\SqlBuilder\Compiles\CompiledDelete;
+use Francerz\SqlBuilder\Compiles\CompiledInsert;
+use Francerz\SqlBuilder\Compiles\CompiledProcedure;
+use Francerz\SqlBuilder\Compiles\CompiledSelect;
+use Francerz\SqlBuilder\Compiles\CompiledUpdate;
 use Francerz\SqlBuilder\ConnectParams;
-use Francerz\SqlBuilder\DeleteQuery;
 use Francerz\SqlBuilder\Driver\DriverInterface;
 use Francerz\SqlBuilder\Driver\QueryCompilerInterface;
 use Francerz\SqlBuilder\Driver\QueryTranslatorInterface;
-use Francerz\SqlBuilder\Exceptions\DuplicateEntryException;
-use Francerz\SqlBuilder\Exceptions\ExecuteDeleteException;
-use Francerz\SqlBuilder\Exceptions\ExecuteInsertException;
-use Francerz\SqlBuilder\Exceptions\ExecuteSelectException;
-use Francerz\SqlBuilder\Exceptions\ExecuteUpdateException;
+use Francerz\SqlBuilder\Exceptions\ExecuteStatementException;
 use Francerz\SqlBuilder\Exceptions\TransactionException;
-use Francerz\SqlBuilder\InsertQuery;
 use Francerz\SqlBuilder\Results\DeleteResult;
 use Francerz\SqlBuilder\Results\InsertResult;
 use Francerz\SqlBuilder\Results\SelectResult;
 use Francerz\SqlBuilder\Results\UpdateResult;
-use Francerz\SqlBuilder\SelectQuery;
-use Francerz\SqlBuilder\UpdateQuery;
-use InvalidArgumentException;
 use LogicException;
 use PDO;
 use PDOException;
@@ -89,92 +84,100 @@ class MySQLDriver implements DriverInterface
         return '';
     }
 
-    public function executeSelect(CompiledQuery $query): SelectResult
+    public function executeSelect(CompiledSelect $query): SelectResult
     {
         if (!$this->link instanceof PDO) {
-            throw new LogicException('Not valid database link.');
+            throw new LogicException('Invalid database link.');
         }
-
-        if (!$query->getObject() instanceof SelectQuery) {
-            throw new InvalidArgumentException('Not valid SelectQuery.');
-        }
-
         $stmt = $this->link->prepare($query->getQuery());
         $stmt->execute($query->getValues());
 
         if ($stmt->errorCode() !== '00000') {
-            throw new ExecuteSelectException($query, $stmt->errorInfo()[2]);
+            throw new ExecuteStatementException($query, $stmt->errorInfo()[2]);
         }
 
-        return new SelectResult($query, $stmt->fetchAll(PDO::FETCH_CLASS));
+        return new SelectResult($stmt->fetchAll(PDO::FETCH_CLASS));
     }
 
-    public function executeInsert(CompiledQuery $query): InsertResult
+    public function executeInsert(CompiledInsert $query): InsertResult
     {
         if (!$this->link instanceof PDO) {
-            throw new LogicException('Not valid database link.');
-        }
-
-        if (!$query->getObject() instanceof InsertQuery) {
-            throw new InvalidArgumentException('Not valid InsertQuery.');
+            throw new LogicException('Invalid database link.');
         }
 
         $stmt = $this->link->prepare($query->getQuery());
         $stmt->execute($query->getValues());
 
         if ($stmt->errorCode() !== '00000') {
-            $info = $stmt->errorInfo()[2];
-            switch ($stmt->errorCode()) {
-                case '23000':
-                    if (stripos($info, 'Duplicate entry') !== false) {
-                        throw new DuplicateEntryException($query, $info);
-                    }
-                    break;
+            throw new ExecuteStatementException($query, $stmt->errorInfo()[2]);
+        }
+
+        return new InsertResult($stmt->rowCount(), $this->link->lastInsertId());
+    }
+
+    public function executeUpdate(CompiledUpdate $query): UpdateResult
+    {
+        if (!$this->link instanceof PDO) {
+            throw new LogicException('Invalid database link.');
+        }
+
+        $stmt = $this->link->prepare($query->getQuery());
+        $stmt->execute($query->getValues());
+
+        if ($stmt->errorCode() !== '00000') {
+            throw new ExecuteStatementException($query, $stmt->errorInfo()[2]);
+        }
+
+        return new UpdateResult($stmt->rowCount());
+    }
+
+    public function executeDelete(CompiledDelete $query): DeleteResult
+    {
+        if (!$this->link instanceof PDO) {
+            throw new LogicException('Invalid database link.');
+        }
+
+        $stmt = $this->link->prepare($query->getQuery());
+        $stmt->execute($query->getValues());
+
+        if ($stmt->errorCode() !== '00000') {
+            throw new ExecuteStatementException($query, $stmt->errorInfo()[2]);
+        }
+
+        return new DeleteResult($stmt->rowCount());
+    }
+
+    public function executeProcedure(CompiledProcedure $query): array
+    {
+        if (!$this->link instanceof PDO) {
+            throw new LogicException('Invalid database link.');
+        }
+
+        $stmt = $this->link->prepare($query->getQuery());
+        $stmt->execute($query->getValues());
+
+        if ($stmt->errorCode() !== '00000') {
+            throw new ExecuteStatementException($query, $stmt->errorInfo()[2]);
+        }
+
+        $results = [];
+        do {
+            $rows = $stmt->fetchAll(PDO::FETCH_CLASS);
+            if (false !== $rows) {
+                $results[] = new SelectResult($rows);
             }
-            throw new ExecuteInsertException($query, $info);
-        }
+        } while ($stmt->nextRowset());
 
-        return new InsertResult($query, $stmt->rowCount(), $this->link->lastInsertId());
+        return $results;
     }
 
-    public function executeUpdate(CompiledQuery $query): UpdateResult
+    public function inTransaction(): bool
     {
-        if (!$this->link instanceof PDO) {
-            throw new LogicException('Not valid database link.');
+        try {
+            return $this->link->inTransaction();
+        } catch (PDOException $pdoex) {
+            throw new TransactionException($pdoex->getMessage(), 4, $pdoex);
         }
-
-        if (!$query->getObject() instanceof UpdateQuery) {
-            throw new InvalidArgumentException('Not valid UpdateQuery.');
-        }
-
-        $stmt = $this->link->prepare($query->getQuery());
-        $stmt->execute($query->getValues());
-
-        if ($stmt->errorCode() !== '00000') {
-            throw new ExecuteUpdateException($query, $stmt->errorInfo()[2]);
-        }
-
-        return new UpdateResult($query, $stmt->rowCount());
-    }
-
-    public function executeDelete(CompiledQuery $query): DeleteResult
-    {
-        if (!$this->link instanceof PDO) {
-            throw new LogicException('Not valid database link.');
-        }
-
-        if (!$query->getObject() instanceof DeleteQuery) {
-            throw new InvalidArgumentException('Not valid DeleteQuery.');
-        }
-
-        $stmt = $this->link->prepare($query->getQuery());
-        $stmt->execute($query->getValues());
-
-        if ($stmt->errorCode() !== '00000') {
-            throw new ExecuteDeleteException($query, $stmt->errorInfo()[2]);
-        }
-
-        return new DeleteResult($query, $stmt->rowCount());
     }
 
     public function startTransaction(): bool

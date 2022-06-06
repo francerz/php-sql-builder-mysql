@@ -2,12 +2,11 @@
     "name": "francerz/mysql-builder",
     "description": "MySQL driver for francerz/sql-builder",
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Francerz",
-            "role": "Developer"
-        }
-    ],
+    "minimum-stability": "dev",
+    "authors": [{
+        "name": "Francerz",
+        "role": "Developer"
+    }],
     "autoload": {
         "files": ["src/init.php"],
         "psr-4": {
@@ -18,7 +17,7 @@
         "php": "^7.0",
         "ext-PDO": "^7.0",
         "ext-pdo_mysql": "^7.0",
-        "francerz/sql-builder": "^0.4"
+        "francerz/sql-builder": "dev-v0.5-draft"
     },
     "require-dev": {
         "phpunit/phpunit": "^8.5"

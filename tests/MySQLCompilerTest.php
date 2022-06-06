@@ -2,6 +2,7 @@
 
 namespace Francerz\SqlBuilder\MySQL\Tests;
 
+use DateTime;
 use Francerz\SqlBuilder\Components\Table;
 use Francerz\SqlBuilder\MySQL\MySQLDriver;
 use Francerz\SqlBuilder\Query;
@@ -21,12 +22,17 @@ class MySQLCompilerTest extends TestCase
     public function testCompileSingleQuery()
     {
         $query = Query::selectFrom(new Table('table', 't1', 'db'), ['a' => 'firstCol', 'b' => 'secondCol']);
+        $query->where('a.datetime', new DateTime('2022-06-04 17:40:34'));
 
-        $compiled = $this->compiler->compileQuery($query);
+        $compiled = $this->compiler->compileSelect($query);
 
         $this->assertEquals(
-            'SELECT `t1`.`firstCol` AS `a`, `t1`.`secondCol` AS `b` FROM `db`.`table` AS `t1`',
+            'SELECT `t1`.`firstCol` AS `a`, `t1`.`secondCol` AS `b` FROM `db`.`table` AS `t1` WHERE `a`.`datetime` = :v1',
             $compiled->getQuery()
+        );
+        $this->assertEquals(
+            ['v1' => '2022-06-04 17:40:34'],
+            $compiled->getValues()
         );
     }
 }

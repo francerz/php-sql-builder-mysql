@@ -2,6 +2,7 @@
 
 namespace Francerz\SqlBuilder\MySQL;
 
+use DateTimeInterface;
 use Francerz\SqlBuilder\Components\JoinTypes;
 use Francerz\SqlBuilder\Driver\QueryCompiler;
 
@@ -39,5 +40,9 @@ class MySQLCompiler extends QueryCompiler
             default:
                 return parent::compileJoinType($joinType);
         }
+    }
+    protected function compileDatetime(DateTimeInterface $datetime)
+    {
+        return $datetime->format('Y-m-d H:i:s');
     }
 }
