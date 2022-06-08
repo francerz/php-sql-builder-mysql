@@ -10,7 +10,6 @@ use Francerz\SqlBuilder\Compiles\CompiledUpdate;
 use Francerz\SqlBuilder\ConnectParams;
 use Francerz\SqlBuilder\Driver\DriverInterface;
 use Francerz\SqlBuilder\Driver\QueryCompilerInterface;
-use Francerz\SqlBuilder\Driver\QueryTranslatorInterface;
 use Francerz\SqlBuilder\Exceptions\ExecuteStatementException;
 use Francerz\SqlBuilder\Exceptions\TransactionException;
 use Francerz\SqlBuilder\Results\DeleteResult;
@@ -30,12 +29,10 @@ class MySQLDriver implements DriverInterface
      */
     private $link;
     private $compiler;
-    private $translator;
 
     public function __construct()
     {
         $this->compiler = new MySQLCompiler();
-        $this->translator = null;
     }
 
     public function connect(ConnectParams $params)
@@ -57,11 +54,6 @@ class MySQLDriver implements DriverInterface
     public function getCompiler(): ?QueryCompilerInterface
     {
         return $this->compiler;
-    }
-
-    public function getTranslator(): ?QueryTranslatorInterface
-    {
-        return $this->translator;
     }
 
     public function getDefaultHost(): string
