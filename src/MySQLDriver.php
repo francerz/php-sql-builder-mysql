@@ -159,6 +159,7 @@ class MySQLDriver implements DriverInterface
                 $results[] = new SelectResult($rows);
             }
         } while ($stmt->nextRowset());
+        array_pop($results);
 
         return $results;
     }

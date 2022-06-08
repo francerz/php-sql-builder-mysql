@@ -3,8 +3,10 @@
 namespace Francerz\SqlBuilder\MySQL;
 
 use DateTimeInterface;
+use Francerz\SqlBuilder\Compiles\CompiledProcedure;
 use Francerz\SqlBuilder\Components\JoinTypes;
 use Francerz\SqlBuilder\Driver\QueryCompiler;
+use Francerz\SqlBuilder\StoredProcedure;
 
 class MySQLCompiler extends QueryCompiler
 {
