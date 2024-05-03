@@ -11,10 +11,11 @@ use PHPUnit\Framework\TestCase;
 class MySQLCompilerTest extends TestCase
 {
     private $compiler;
+    private $driver;
 
-    public function __construct()
+    public function __construct($name = null, array $data = [], $dataName = '')
     {
-        parent::__construct();
+        parent::__construct($name, $data, $dataName);
         $this->driver = new MySQLDriver();
         $this->compiler = $this->driver->getCompiler();
     }
